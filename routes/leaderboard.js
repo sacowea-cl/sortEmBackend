@@ -4,6 +4,8 @@ const Leaderboard = require('../models/leaderboard');
 const { decryptWithMp3Key } = require('../encryption');
 require('dotenv').config();
 
+const bannedUsernames = ['admin', 'root', 'pablochile', 'LinusTorvalds'];
+
 // Get the leaderboard
 router.get('/leaderboard', async (req, res) => {
     try {
@@ -21,7 +23,7 @@ router.get('/leaderboard', async (req, res) => {
 
 const isPostValid = (jsonObject) => {
     const { username, moves, time } = jsonObject;
-    return !(username.length > 30 || moves < 0 || time < 1000)
+    return !(username.length > 30 || moves < 0 || time < 1000 || bannedUsernames.includes(username));
 };
 
 // Post a new score
