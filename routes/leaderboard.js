@@ -9,7 +9,7 @@ router.get('/leaderboard', async (req, res) => {
         const entries = await Leaderboard.findAll({
             attributes: ['username', 'time'],
             order: [['time', 'ASC']],
-            limit: 10
+            limit: 100
         });
         res.json(entries);
     } catch (err) {

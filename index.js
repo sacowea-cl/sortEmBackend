@@ -14,7 +14,7 @@ app.use(express.json());
 app.use('/api', leaderboardRoutes);
 
 // Sync the model with the database
-sequelize.sync({ force: true }) // `force: true` will drop the table if it exists and recreate it
+sequelize.sync({ force: false }) // `force: true` will drop the table if it exists and recreate it
   .then(() => {
     console.log('Database & table created!');
   })
