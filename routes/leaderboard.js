@@ -5,6 +5,7 @@ const { decryptWithMp3Key } = require('../encryption');
 require('dotenv').config();
 
 const bannedUsernames = ['admin', 'root', 'pablochile', 'LinusTorvalds'];
+const bannedAddresses = [''];
 
 // Get the leaderboard
 router.get('/leaderboard', async (req, res) => {
@@ -23,18 +24,21 @@ router.get('/leaderboard', async (req, res) => {
 
 const isPostValid = (jsonObject) => {
     const { username, moves, time } = jsonObject;
-    return !(username.length > 30 || moves < 0 || time < 1000 || bannedUsernames.includes(username));
+    return !(username.length > 30 || moves < 0 || time < 1000 || bannedUsernames.includes(username)
+             || bannedAddresses.includes(jsonObject.address));
 };
 
 // Post a new score
 router.post('/leaderboard', async (req, res) => {
     try {
+        const address = req.socket.remoteAddress;
+        console.log("ip:", address);
         const { x } = req.body;
         const decryptedJson = JSON.parse(await decryptWithMp3Key(x));
         if (!isPostValid(decryptedJson)) {
             return res.status(400).json({ msg: 'Invalid request' });
         }
-        const newEntry = await Leaderboard.create(decryptedJson);
+        const newEntry = await Leaderboard.create({ ...decryptedJson, address: address });
         res.json(newEntry);
     } catch (err) {
         console.error(err.message);

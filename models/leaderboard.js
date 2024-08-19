@@ -19,6 +19,10 @@ const Leaderboard = database.define('Leaderboard', {
         type: DataTypes.FLOAT,
         allowNull: false,
     },
+    address: {
+        type: DataTypes.STRING(50),
+        allowNull: false,
+    },
     created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
