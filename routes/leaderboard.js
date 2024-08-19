@@ -31,7 +31,7 @@ const isPostValid = (jsonObject) => {
 // Post a new score
 router.post('/leaderboard', async (req, res) => {
     try {
-        const address = req.socket.remoteAddress;
+        const address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
         console.log("ip:", address);
         const { x } = req.body;
         const decryptedJson = JSON.parse(await decryptWithMp3Key(x));
