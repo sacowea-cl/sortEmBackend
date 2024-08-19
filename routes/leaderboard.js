@@ -21,7 +21,7 @@ router.get('/leaderboard', async (req, res) => {
 
 const isPostValid = (jsonObject) => {
     const { username, moves, time } = jsonObject;
-    return !(username.length > 30 || moves <= 0 || time < 1000)
+    return !(username.length > 30 || moves < 0 || time < 1000)
 };
 
 // Post a new score
