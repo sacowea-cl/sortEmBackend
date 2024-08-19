@@ -62,7 +62,8 @@ router.patch('/leaderboard/pablochile', async (req, res) => {
 router.get('/leaderboard/usernames', async (req, res) => {
     try {
         const usernames = await Leaderboard.findAll({
-            attributes: ['username']
+            attributes: ['username'],
+            group: ['username']
         });
         res.json(usernames);
     } catch (err) {
