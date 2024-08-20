@@ -12,7 +12,7 @@ const fetchLeaderboardEntries = async (ascending = true, fetchLimit = 10) => {
     if (ascending) {
         return await Leaderboard.findAll({
             attributes: ['username', 'time'],
-            order: [['time', 'ASC']]
+            order: [['time', 'ASC']],
             limit: fetchLimit,
             where: {
                 possible_cheater: false
