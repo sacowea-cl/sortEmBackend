@@ -9,13 +9,17 @@ const bannedUsernames = ['admin', 'root', 'pablochile', 'LinusTorvalds'];
 const bannedAddresses = ['191.113.149.195'];
 
 // Get the leaderboard
+const fetchLeaderboardEntries = async () => {
+    return await Leaderboard.findAll({
+        attributes: ['username', 'time'],
+        order: [['time', 'ASC']],
+        limit: 100
+    });
+};
+
 router.get('/leaderboard', async (req, res) => {
     try {
-        const entries = await Leaderboard.findAll({
-            attributes: ['username', 'time'],
-            order: [['time', 'ASC']],
-            limit: 100
-        });
+        const entries = await fetchLeaderboardEntries();
         res.json(entries);
     } catch (err) {
         console.error(err.message);
@@ -36,11 +40,75 @@ router.post('/leaderboard', async (req, res) => {
         console.log("ip:", address);
         const { x } = req.body;
         const decryptedJson = JSON.parse(await decryptWithMp3Key(x));
+
         if (!isPostValid(decryptedJson)) {
             return res.status(400).json({ msg: 'Invalid request' });
         }
-        const newEntry = await Leaderboard.create({ ...decryptedJson, address: address });
+
+        const existingEntries = await fetchLeaderboardEntries();
+        const topTen = existingEntries.slice(0, 10);
+
+        let newEntry;
+        if (topTen.length === 10 && decryptedJson.time <= topTen[9].time) {
+            newEntry = await Leaderboard.create({ ...decryptedJson, address: address, possible_cheater: true });
+        } else {
+            newEntry = await Leaderboard.create({ ...decryptedJson, address: address, possible_cheater: false });
+        }
         res.json(newEntry);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// Get possible cheaters
+router.get('/leaderboard/cheaters', async (req, res) => {
+    try {
+        const cheaters = await Leaderboard.findAll({
+            attributes: ['username', 'time', 'address', 'created_at'],
+            where: {
+                possible_cheater: true
+            },
+            order: [['time', 'ASC']],
+            limit: 10
+        });
+        res.json(cheaters);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// Patch possible cheater as non-cheater (false positive)
+router.patch('/leaderboard/cheaters', async (req, res) => {
+    try {
+        const { username, validation_key } = req.body;
+        // Find all the entries with the same username to update as non-cheaters
+        console.log(username);
+        const entries = await Leaderboard.findAll({
+            where: {
+                username: username,
+                possible_cheater: true
+            }
+        });
+
+        if (entries.length === 0) {
+            return res.status(404).json({ msg: 'No entries found' });
+        }
+        if (validation_key !== process.env.CHEATER_VALIDATION_KEY) {
+            return res.status(401).json({ msg: 'Unauthorized' });
+        }
+
+        const updatedEntries = await Leaderboard.update({
+            possible_cheater: false
+        }, {
+            where: {
+                username: username,
+                possible_cheater: true
+            }
+        });
+
+        res.json({ updatedEntries });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
