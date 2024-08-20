@@ -14,7 +14,7 @@ const fetchLeaderboardEntries = async (filterCheaters) => {
         return await Leaderboard.findAll({
             attributes: ['username', 'time'],
             order: [['time', 'ASC']],
-            limit: 100,
+            limit: 10,
             where: {
                 possible_cheater: false
             }
@@ -23,7 +23,7 @@ const fetchLeaderboardEntries = async (filterCheaters) => {
     return await Leaderboard.findAll({
         attributes: ['username', 'time'],
         order: [['time', 'ASC']],
-        limit: 100
+        limit: 10
     });
 };
 
