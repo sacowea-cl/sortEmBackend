@@ -106,6 +106,26 @@ router.get('/leaderboard/cheaters', async (req, res) => {
     }
 });
 
+//Get username all games
+
+router.get('/leaderboard/games', async (req, res) => {
+    try {
+        const { username } = req.query;
+        const user = await Leaderboard.findAll({
+            attributes: ['username', 'time', 'created_at'],
+            where: {
+                username: username
+            },
+            order: [['time', 'ASC']],
+        });
+        res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+}
+);
+
 // Patch possible cheater as non-cheater (false positive)
 router.patch('/leaderboard/cheaters', async (req, res) => {
     try {
