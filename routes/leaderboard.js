@@ -6,9 +6,6 @@ const BannedIP = require('../models/BannedIP');
 const { decryptWithMp3Key } = require('../encryption');
 require('dotenv').config();
 
-const bannedUsernames = ['admin', 'root', 'pablochile', 'LinusTorvalds'];
-const bannedAddresses = ['191.113.149.195', '181.43.9.170'];
-
 const fetchLeaderboardEntries = async (ascending = true, fetchLimit = 10) => {
     if (ascending) {
         return await Leaderboard.findAll({
@@ -41,11 +38,16 @@ router.get('/leaderboard', async (req, res) => {
     }
 });
 
-const isPostValid = (jsonObject) => {
+const isPostValid = async (jsonObject) => {
     const { username, moves, time } = jsonObject;
+    const isIpBanned = await BannedIP.findOne({
+        where: {
+            ip_address: address
+        }
+    });
+
     const alphanumericRegex = /^[a-zA-Z0-9]+$/;
-    return !(username.length > 25 || moves < 0 || time < 1000 || bannedUsernames.includes(username)
-             || bannedAddresses.includes(jsonObject.address) || !alphanumericRegex.test(username));
+    return !(username.length > 25 || moves < 0 || time < 1000 || isIpBanned || !alphanumericRegex.test(username));
 };
 
 // Post a new score
@@ -56,7 +58,7 @@ router.post('/leaderboard', async (req, res) => {
         const { x } = req.body;
         const decryptedJson = JSON.parse(await decryptWithMp3Key(x));
 
-        if (!isPostValid(decryptedJson)) {
+        if (!await isPostValid(decryptedJson)) {
             return res.status(400).json({ msg: 'Invalid request' });
         }
 
