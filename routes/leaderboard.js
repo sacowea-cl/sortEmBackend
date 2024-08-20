@@ -8,13 +8,12 @@ require('dotenv').config();
 const bannedUsernames = ['admin', 'root', 'pablochile', 'LinusTorvalds'];
 const bannedAddresses = ['191.113.149.195', '181.43.9.170'];
 
-// Get the leaderboard
-const fetchLeaderboardEntries = async (filterCheaters) => {
-    if (filterCheaters) {
+const fetchLeaderboardEntries = async (ascending = true, fetchLimit = 10) => {
+    if (ascending) {
         return await Leaderboard.findAll({
             attributes: ['username', 'time'],
-            order: [['time', 'ASC']],
-            limit: 10,
+            order: [['time', 'ASC']]
+            limit: fetchLimit,
             where: {
                 possible_cheater: false
             }
@@ -22,14 +21,18 @@ const fetchLeaderboardEntries = async (filterCheaters) => {
     }
     return await Leaderboard.findAll({
         attributes: ['username', 'time'],
-        order: [['time', 'ASC']],
-        limit: 10
+        order: [['time', 'DESC']],
+        limit: fetchLimit,
+        where: {
+            possible_cheater: false
+        }
     });
 };
 
+// Get the leaderboard
 router.get('/leaderboard', async (req, res) => {
     try {
-        const entries = await fetchLeaderboardEntries(filterCheaters = true);
+        const entries = await fetchLeaderboardEntries();
         res.json(entries);
     } catch (err) {
         console.error(err.message);
@@ -39,8 +42,9 @@ router.get('/leaderboard', async (req, res) => {
 
 const isPostValid = (jsonObject) => {
     const { username, moves, time } = jsonObject;
-    return !(username.length > 30 || moves < 0 || time < 1000 || bannedUsernames.includes(username)
-             || bannedAddresses.includes(jsonObject.address));
+    const alphanumericRegex = /^[a-zA-Z0-9]+$/;
+    return !(username.length > 25 || moves < 0 || time < 1000 || bannedUsernames.includes(username)
+             || bannedAddresses.includes(jsonObject.address) || !alphanumericRegex.test(username));
 };
 
 // Post a new score
@@ -55,11 +59,13 @@ router.post('/leaderboard', async (req, res) => {
             return res.status(400).json({ msg: 'Invalid request' });
         }
 
-        const existingEntries = await fetchLeaderboardEntries();
-        const topTen = existingEntries.slice(0, 10);
+        const topTen = await fetchLeaderboardEntries();
+        const worstTen = await fetchLeaderboardEntries(ascending = false);
 
         let newEntry;
         if (topTen.length === 10 && decryptedJson.time <= topTen[9].time) {
+            newEntry = await Leaderboard.create({ ...decryptedJson, address: address, possible_cheater: true });
+        } else if (worstTen.length === 10 && decryptedJson.time >= worstTen[9].time) {
             newEntry = await Leaderboard.create({ ...decryptedJson, address: address, possible_cheater: true });
         } else {
             newEntry = await Leaderboard.create({ ...decryptedJson, address: address, possible_cheater: false });
