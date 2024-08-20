@@ -2,6 +2,7 @@ const express = require('express');
 const Sequelize = require('sequelize');
 const router = express.Router();
 const Leaderboard = require('../models/leaderboard');
+const BannedIP = require('../models/BannedIP');
 const { decryptWithMp3Key } = require('../encryption');
 require('dotenv').config();
 
@@ -240,6 +241,20 @@ router.get('/leaderboard/usernames', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+//Get banned ips
+router.get('/leaderboard/banned', async (req, res) => {
+    try {
+        const banned = await BannedIP.findAll({
+            attributes: ['ip_address', 'banned_at'],
+        });
+        res.json(banned);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 
 
 module.exports = router;
