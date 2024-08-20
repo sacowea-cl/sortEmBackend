@@ -88,7 +88,10 @@ router.get('/leaderboard/best', async (req, res) => {
             attributes: ['username', 'time'],
             order: [['time', 'ASC']],
             offset: parseInt(position) - 1,
-            limit: 1
+            limit: 1,
+            where: {
+                possible_cheater: false
+            }
         });
         res.json(best);
     } catch (err) {
