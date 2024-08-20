@@ -258,7 +258,7 @@ router.get('/leaderboard/banned', async (req, res) => {
 // Ban an IP address
 router.post('/leaderboard/banned', async (req, res) => {
     try {
-        const { ip_address } = req.body;
+        const { ip_address, password } = req.body;
         if (password !== process.env.DELETE_PASSWORD) {
             return res.status(401).json({ msg: 'Unauthorized' });
         }
