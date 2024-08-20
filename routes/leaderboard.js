@@ -78,7 +78,7 @@ router.get('/leaderboard/best', async (req, res) => {
         const best = await Leaderboard.findOne({
             attributes: ['username', 'time'],
             order: [['time', 'ASC']],
-            offset: position,
+            offset: parseInt(position) - 1,
             limit: 1
         });
         res.json(best);
