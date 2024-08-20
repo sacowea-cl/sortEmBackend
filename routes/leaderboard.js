@@ -6,13 +6,13 @@ const { decryptWithMp3Key } = require('../encryption');
 require('dotenv').config();
 
 const bannedUsernames = ['admin', 'root', 'pablochile', 'LinusTorvalds'];
-const bannedAddresses = ['191.113.149.195'];
+const bannedAddresses = ['191.113.149.195', '181.43.9.170'];
 
 const fetchLeaderboardEntries = async (ascending = true, fetchLimit = 10) => {
     if (ascending) {
         return await Leaderboard.findAll({
             attributes: ['username', 'time'],
-            order: [['time', 'ASC']],
+            order: [['time', 'ASC']]
             limit: fetchLimit,
             where: {
                 possible_cheater: false
@@ -77,6 +77,23 @@ router.post('/leaderboard', async (req, res) => {
     }
 });
 
+// Get best time
+router.get('/leaderboard/best', async (req, res) => {
+    try {
+        const { position } = req.query;
+        const best = await Leaderboard.findOne({
+            attributes: ['username', 'time'],
+            order: [['time', 'ASC']],
+            offset: parseInt(position) - 1,
+            limit: 1
+        });
+        res.json(best);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 // Get possible cheaters
 router.get('/leaderboard/cheaters', async (req, res) => {
     try {
@@ -94,6 +111,25 @@ router.get('/leaderboard/cheaters', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+//Get username all games
+router.get('/leaderboard/games', async (req, res) => {
+    try {
+        const { username } = req.query;
+        const user = await Leaderboard.findAll({
+            attributes: ['username', 'time', 'created_at'],
+            where: {
+                username: username
+            },
+            order: [['time', 'ASC']],
+        });
+        res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+}
+);
 
 // Patch possible cheater as non-cheater (false positive)
 router.patch('/leaderboard/cheaters', async (req, res) => {
