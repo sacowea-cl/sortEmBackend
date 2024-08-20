@@ -23,6 +23,10 @@ const Leaderboard = database.define('Leaderboard', {
         type: DataTypes.STRING(50),
         allowNull: false,
     },
+    possible_cheater: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+    },
     created_at: {
         type: DataTypes.DATE,
         defaultValue: DataTypes.NOW,
