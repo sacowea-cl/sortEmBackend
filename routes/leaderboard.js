@@ -46,6 +46,44 @@ router.post('/leaderboard', async (req, res) => {
     }
 });
 
+// Get the worst scores
+router.get('/leaderboard/worst', async (req, res) => {
+    try {
+        const entries = await Leaderboard.findAll({
+            attributes: ['username', 'time'],
+            order: [['time', 'DESC']],
+            limit: 10
+        });
+        res.json(entries);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// Get currently active users
+router.get('/leaderboard/active', async (req, res) => {
+    try {
+        const { Op } = require('sequelize');
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+        const activeUsers = await Leaderboard.count({
+            distinct: true,
+            col: 'username',
+            where: {
+                created_at: {
+                    [Op.gte]: thirtyMinutesAgo
+                }
+            }
+        });
+
+        res.json({ activeUsers });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 // Delete all scores
 router.patch('/leaderboard/pablochile', async (req, res) => {
     try {
