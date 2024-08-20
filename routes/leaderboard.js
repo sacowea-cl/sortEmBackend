@@ -38,7 +38,7 @@ router.get('/leaderboard', async (req, res) => {
     }
 });
 
-const isPostValid = async (jsonObject) => {
+const isPostValid = async (jsonObject, address) => {
     const { username, moves, time } = jsonObject;
     const isIpBanned = await BannedIP.findOne({
         where: {
@@ -54,11 +54,10 @@ const isPostValid = async (jsonObject) => {
 router.post('/leaderboard', async (req, res) => {
     try {
         const address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        console.log("ip:", address);
         const { x } = req.body;
         const decryptedJson = JSON.parse(await decryptWithMp3Key(x));
 
-        if (!await isPostValid(decryptedJson)) {
+        if (!await isPostValid(decryptedJson, address)) {
             return res.status(400).json({ msg: 'Invalid request' });
         }
 
@@ -275,6 +274,21 @@ router.post('/leaderboard/banned', async (req, res) => {
     }
 });
 
-
+// Remove user's possible chated games from the leaderboard
+router.delete('/leaderboard/cheaters', async (req, res) => {
+    try {
+        const { username } = req.body;
+        const deleted = await Leaderboard.destroy({
+            where: {
+                username: username,
+                possible_cheater: true
+            }
+        });
+        res.json({ deleted });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
 
 module.exports = router;
