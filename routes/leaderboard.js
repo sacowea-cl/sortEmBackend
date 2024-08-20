@@ -255,6 +255,21 @@ router.get('/leaderboard/banned', async (req, res) => {
     }
 });
 
+// Ban an IP address
+router.post('/leaderboard/banned', async (req, res) => {
+    try {
+        const { ip_address } = req.body;
+        if (password !== process.env.DELETE_PASSWORD) {
+            return res.status(401).json({ msg: 'Unauthorized' });
+        }
+        const address = await BannedIP.create({ ip_address });
+        res.json(address);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 
 
 module.exports = router;
