@@ -9,7 +9,17 @@ const bannedUsernames = ['admin', 'root', 'pablochile', 'LinusTorvalds'];
 const bannedAddresses = ['191.113.149.195', '181.43.9.170'];
 
 // Get the leaderboard
-const fetchLeaderboardEntries = async () => {
+const fetchLeaderboardEntries = async (filterCheaters) => {
+    if (filterCheaters) {
+        return await Leaderboard.findAll({
+            attributes: ['username', 'time'],
+            order: [['time', 'ASC']],
+            limit: 100,
+            where: {
+                possible_cheater: false
+            }
+        });
+    }
     return await Leaderboard.findAll({
         attributes: ['username', 'time'],
         order: [['time', 'ASC']],
@@ -19,7 +29,7 @@ const fetchLeaderboardEntries = async () => {
 
 router.get('/leaderboard', async (req, res) => {
     try {
-        const entries = await fetchLeaderboardEntries();
+        const entries = await fetchLeaderboardEntries(filterCheaters = true);
         res.json(entries);
     } catch (err) {
         console.error(err.message);
