@@ -5,7 +5,7 @@ const { decryptWithMp3Key } = require('../encryption');
 require('dotenv').config();
 
 const bannedUsernames = ['admin', 'root', 'pablochile', 'LinusTorvalds'];
-const bannedAddresses = [''];
+const bannedAddresses = ['191.113.149.195'];
 
 // Get the leaderboard
 router.get('/leaderboard', async (req, res) => {
