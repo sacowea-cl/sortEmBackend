@@ -107,7 +107,6 @@ router.get('/leaderboard/cheaters', async (req, res) => {
 });
 
 //Get username all games
-
 router.get('/leaderboard/games', async (req, res) => {
     try {
         const { username } = req.query;
