@@ -1,4 +1,5 @@
 const express = require('express');
+const Sequelize = require('sequelize');
 const router = express.Router();
 const Leaderboard = require('../models/leaderboard');
 const { decryptWithMp3Key } = require('../encryption');
@@ -102,12 +103,16 @@ router.patch('/leaderboard/pablochile', async (req, res) => {
     }
 });
 
-// Get all usernames
+// Get all usernames ordered by oldest recorded game
 router.get('/leaderboard/usernames', async (req, res) => {
     try {
         const usernames = await Leaderboard.findAll({
-            attributes: ['username'],
-            group: ['username']
+            attributes: [
+                'username',
+                [Sequelize.fn('MIN', Sequelize.col('created_at')), 'earliestCreatedAt']
+            ],
+            group: ['username'],
+            order: [[Sequelize.fn('MIN', Sequelize.col('created_at')), 'ASC']],
         });
         res.json(usernames);
     } catch (err) {
@@ -115,5 +120,6 @@ router.get('/leaderboard/usernames', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
 
 module.exports = router;
