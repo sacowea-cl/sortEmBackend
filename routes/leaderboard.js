@@ -71,6 +71,23 @@ router.post('/leaderboard', async (req, res) => {
     }
 });
 
+// Get best time
+router.get('/leaderboard/best', async (req, res) => {
+    try {
+        const { position } = req.query;
+        const best = await Leaderboard.findOne({
+            attributes: ['username', 'time'],
+            order: [['time', 'ASC']],
+            offset: position,
+            limit: 1
+        });
+        res.json(best);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 // Get possible cheaters
 router.get('/leaderboard/cheaters', async (req, res) => {
     try {
