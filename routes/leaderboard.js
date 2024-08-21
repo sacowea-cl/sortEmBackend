@@ -291,4 +291,15 @@ router.delete('/leaderboard/cheaters', async (req, res) => {
     }
 });
 
+// Get the total number of scores
+router.get('/leaderboard/total', async (req, res) => {
+    try {
+        const total = await Leaderboard.count();
+        res.json({ total });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 module.exports = router;
