@@ -27,7 +27,7 @@ const fetchLeaderboardEntries = async (ascending = true, fetchLimit = 50) => {
     });
 };
 
-const fetchDailyLeaderboardEntries = async (ascending = true, fetchLimit = 10) => {
+const fetchDailyLeaderboardEntries = async (ascending = true, fetchLimit = 100) => {
     const { Op } = require('sequelize');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -72,7 +72,7 @@ router.get('/leaderboard', async (req, res) => {
 // Get daily leaderboard
 router.get('/leaderboard/daily', async (req, res) => {
     try {
-        const entries = await fetchDailyLeaderboardEntries(fetchLimit = 100);
+        const entries = await fetchDailyLeaderboardEntries(;
         res.json(entries);
     } catch (err) {
         console.error(err.message);
