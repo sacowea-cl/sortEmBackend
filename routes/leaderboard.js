@@ -27,10 +27,52 @@ const fetchLeaderboardEntries = async (ascending = true, fetchLimit = 50) => {
     });
 };
 
+const fetchDailyLeaderboardEntries = async (ascending = true, fetchLimit = 10) => {
+    const { Op } = require('sequelize');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (ascending) {
+        return await Leaderboard.findAll({
+            attributes: ['username', 'time'],
+            order: [['time', 'ASC']],
+            limit: fetchLimit,
+            where: {
+                created_at: {
+                    [Op.gte]: today
+                },
+                possible_cheater: false
+            }
+        });
+    }
+    return await Leaderboard.findAll({
+        attributes: ['username', 'time'],
+        order: [['time', 'DESC']],
+        limit: fetchLimit,
+        where: {
+            created_at: {
+                [Op.gte]: today
+            },
+            possible_cheater: false
+        }
+    });
+};
+
 // Get the leaderboard
 router.get('/leaderboard', async (req, res) => {
     try {
         const entries = await fetchLeaderboardEntries();
+        res.json(entries);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// Get daily leaderboard
+router.get('/leaderboard/daily', async (req, res) => {
+    try {
+        const entries = await fetchDailyLeaderboardEntries();
         res.json(entries);
     } catch (err) {
         console.error(err.message);
