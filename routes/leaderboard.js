@@ -72,7 +72,7 @@ router.get('/leaderboard', async (req, res) => {
 // Get daily leaderboard
 router.get('/leaderboard/daily', async (req, res) => {
     try {
-        const entries = await fetchDailyLeaderboardEntries(;
+        const entries = await fetchDailyLeaderboardEntries();
         res.json(entries);
     } catch (err) {
         console.error(err.message);
