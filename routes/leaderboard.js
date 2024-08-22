@@ -107,9 +107,8 @@ router.post('/leaderboard', async (req, res) => {
         const worstTen = await fetchLeaderboardEntries(ascending = false, fetchLimit = 10);
 
         let newEntry;
-        if (top50.length === 50 && decryptedJson.time <= top50[49].time) {
-            newEntry = await Leaderboard.create({ ...decryptedJson, address: address, possible_cheater: true });
-        } else if (worstTen.length === 10 && decryptedJson.time >= worstTen[9].time) {
+        if ((top50.length === 50 && decryptedJson.time <= top50[49].time) ||
+            (worstTen.length === 10 && decryptedJson.time >= worstTen[9].time)) {
             newEntry = await Leaderboard.create({ ...decryptedJson, address: address, possible_cheater: true });
         } else {
             newEntry = await Leaderboard.create({ ...decryptedJson, address: address, possible_cheater: false });
