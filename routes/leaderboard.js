@@ -6,7 +6,7 @@ const BannedIP = require('../models/BannedIP');
 const { decryptWithMp3Key } = require('../encryption');
 require('dotenv').config();
 
-const fetchLeaderboardEntries = async (ascending = true, fetchLimit = 10) => {
+const fetchLeaderboardEntries = async (ascending = true, fetchLimit = 50) => {
     if (ascending) {
         return await Leaderboard.findAll({
             attributes: ['username', 'time'],
@@ -103,12 +103,13 @@ router.post('/leaderboard', async (req, res) => {
             return res.status(400).json({ msg: 'Invalid request' });
         }
 
-        const topTen = await fetchLeaderboardEntries();
-        const worstTen = await fetchLeaderboardEntries(ascending = false);
+        const top50 = await fetchLeaderboardEntries();
+        const worstTen = await fetchLeaderboardEntries(ascending = false, fetchLimit = 10);
 
         let newEntry;
-        if ((topTen.length === 10 && decryptedJson.time <= topTen[9].time) ||
-            (worstTen.length === 10 && decryptedJson.time >= worstTen[9].time)) {
+        if (top50.length === 50 && decryptedJson.time <= top50[49].time) {
+            newEntry = await Leaderboard.create({ ...decryptedJson, address: address, possible_cheater: true });
+        } else if (worstTen.length === 10 && decryptedJson.time >= worstTen[9].time) {
             newEntry = await Leaderboard.create({ ...decryptedJson, address: address, possible_cheater: true });
         } else {
             newEntry = await Leaderboard.create({ ...decryptedJson, address: address, possible_cheater: false });
@@ -128,7 +129,10 @@ router.get('/leaderboard/best', async (req, res) => {
             attributes: ['username', 'time'],
             order: [['time', 'ASC']],
             offset: parseInt(position) - 1,
-            limit: 1
+            limit: 1,
+            where: {
+                possible_cheater: false
+            }
         });
         res.json(best);
     } catch (err) {
@@ -323,6 +327,17 @@ router.delete('/leaderboard/cheaters', async (req, res) => {
             }
         });
         res.json({ deleted });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
+// Get the total number of scores
+router.get('/leaderboard/total', async (req, res) => {
+    try {
+        const total = await Leaderboard.count();
+        res.json({ total });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
