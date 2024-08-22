@@ -6,7 +6,7 @@ const BannedIP = require('../models/BannedIP');
 const { decryptWithMp3Key } = require('../encryption');
 require('dotenv').config();
 
-const fetchLeaderboardEntries = async (ascending = true, fetchLimit = 50) => {
+const fetchLeaderboardEntries = async ({ ascending = true, fetchLimit = 50 } = {}) => {
     if (ascending) {
         return await Leaderboard.findAll({
             attributes: ['username', 'time'],
@@ -27,7 +27,7 @@ const fetchLeaderboardEntries = async (ascending = true, fetchLimit = 50) => {
     });
 };
 
-const fetchDailyLeaderboardEntries = async (ascending = true, fetchLimit = 100) => {
+const fetchDailyLeaderboardEntries = async ({ ascending = true, fetchLimit = 10 } = {}) => {
     const { Op } = require('sequelize');
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -104,7 +104,7 @@ router.post('/leaderboard', async (req, res) => {
         }
 
         const top50 = await fetchLeaderboardEntries();
-        const worstTen = await fetchLeaderboardEntries(ascending = false, fetchLimit = 10);
+        const worstTen = await fetchLeaderboardEntries({ ascending: false, fetchLimit: 10 });
 
         let newEntry;
         if ((top50.length === 50 && decryptedJson.time <= top50[49].time) ||
