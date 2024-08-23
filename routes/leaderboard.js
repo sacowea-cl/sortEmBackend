@@ -30,7 +30,7 @@ const fetchLeaderboardEntries = async ({ ascending = true, fetchLimit = 50 } = {
 const fetchTodayLeaderboardEntries = async ({ ascending = true, fetchLimit = 10 } = {}) => {
     const { Op } = require('sequelize');
     const today = new Date();
-    today.setHours(4, 0, 0, 0); // Set the time to 4:00:00.000 to account for timezones
+    today.setHours(0, 0, 0, 0); // Set the time to 4:00:00.000 to account for timezones
 
     if (ascending) {
         return await Leaderboard.findAll({
