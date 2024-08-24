@@ -1,3 +1,4 @@
+const { DataTypes } = require('sequelize');
 const database = require('../config/database');
 
 const ReferralLog = database.define('ReferralLog', {
