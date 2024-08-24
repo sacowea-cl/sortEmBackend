@@ -29,9 +29,12 @@ const fetchLeaderboardEntries = async ({ ascending = true, fetchLimit = 50 } = {
 
 const fetchTodayLeaderboardEntries = async ({ ascending = true, fetchLimit = 10 } = {}) => {
     const { Op } = require('sequelize');
-    const today = new Date();
-    // today.setUTCHours(4, 0, 0, 0);
-    today.setUTCHours(0, 0, 0, 0);
+    const startOfDay = new Date();
+    startOfDay.setUTCHours(0, 0, 0, 0);
+
+    // Adjust for GMT -4 time zone
+    const offset = 4 * 60 * 60 * 1000; // 4 hours in milliseconds
+    const startOfDayInTimeZone = new Date(startOfDay.getTime() - offset);
 
     const order = ascending ? 'ASC' : 'DESC';
 
@@ -41,12 +44,13 @@ const fetchTodayLeaderboardEntries = async ({ ascending = true, fetchLimit = 10 
         limit: fetchLimit,
         where: {
             created_at: {
-                [Op.gte]: today
+                [Op.gte]: startOfDayInTimeZone
             },
             possible_cheater: false
         }
     });
 };
+
 
 
 // Get the leaderboard
