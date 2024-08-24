@@ -32,22 +32,11 @@ const fetchTodayLeaderboardEntries = async ({ ascending = true, fetchLimit = 10 
     const today = new Date();
     today.setUTCHours(4, 0, 0, 0);
 
-    if (ascending) {
-        return await Leaderboard.findAll({
-            attributes: ['username', 'time'],
-            order: [['time', 'ASC']],
-            limit: fetchLimit,
-            where: {
-                created_at: {
-                    [Op.gte]: today
-                },
-                possible_cheater: false
-            }
-        });
-    }
+    const order = ascending ? 'ASC' : 'DESC';
+
     return await Leaderboard.findAll({
         attributes: ['username', 'time'],
-        order: [['time', 'DESC']],
+        order: [['time', order]],
         limit: fetchLimit,
         where: {
             created_at: {
@@ -57,6 +46,7 @@ const fetchTodayLeaderboardEntries = async ({ ascending = true, fetchLimit = 10 
         }
     });
 };
+
 
 // Get the leaderboard
 router.get('/leaderboard', async (req, res) => {
