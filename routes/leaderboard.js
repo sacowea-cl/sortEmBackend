@@ -30,7 +30,8 @@ const fetchLeaderboardEntries = async ({ ascending = true, fetchLimit = 50 } = {
 const fetchTodayLeaderboardEntries = async ({ ascending = true, fetchLimit = 10 } = {}) => {
     const { Op } = require('sequelize');
     const today = new Date();
-    today.setUTCHours(4, 0, 0, 0);
+    // today.setUTCHours(4, 0, 0, 0);
+    today.setUTCHours(0, 0, 0, 0);
 
     const order = ascending ? 'ASC' : 'DESC';
 
