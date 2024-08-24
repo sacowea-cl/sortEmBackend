@@ -338,4 +338,18 @@ router.get('/leaderboard/total', async (req, res) => {
     }
 });
 
+// Log referral code
+router.post('/referral', async (req, res) => {
+    try {
+        const { referral } = req.body;
+        const address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        const newReferral = await ReferralLog.create({ referral, address });
+        // res.json(newReferral);
+        res.status(200).send('Referral code logged');
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 module.exports = router;
