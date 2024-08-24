@@ -3,6 +3,7 @@ const Sequelize = require('sequelize');
 const router = express.Router();
 const Leaderboard = require('../models/leaderboard');
 const BannedIP = require('../models/BannedIP');
+const ReferralLog = require('../models/ReferralLog');
 const { decryptWithMp3Key } = require('../encryption');
 require('dotenv').config();
 
